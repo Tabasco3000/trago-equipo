@@ -1,0 +1,16 @@
+{
+  "name": "trago-equipo",
+  "description": "Los paquetes del equipo de TRAGO.",
+  "owner": { "name": "TRAGO." },
+  "plugins": [
+    {
+      "name": "trago-marketing",
+      "description": "El Cerebro TRAGO. para el equipo de marketing: la entrevista de entrada, y después los agentes del equipo.",
+      "source": {
+        "source": "archive",
+        "url": "https://raw.githubusercontent.com/Tabasco3000/trago-equipo/main/dist/trago-marketing-0.1.0.zip",
+        "sha256": "0e0a129a97da249b1f7436ec3745191e260e710f65259ab99a609f76539981df"
+      }
+    }
+  ]
+}
