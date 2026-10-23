@@ -19,7 +19,8 @@ const PERMITIDO = /"sha256": "[0-9a-f]{64}"/g;
 const archivos = (p) => (fs.statSync(p).isDirectory() ? fs.readdirSync(p).flatMap((x) => archivos(path.join(p, x))) : [p]);
 
 test("el paquete público no lleva nada que no deba", () => {
-  const vistos = REVISAR.flatMap((x) => archivos(path.join(RAIZ, x)));
+  // en un clon limpio .claude-plugin/ todavía no existe (git no guarda carpetas vacías)
+  const vistos = REVISAR.map((x) => path.join(RAIZ, x)).filter((x) => fs.existsSync(x)).flatMap(archivos);
   assert.ok(vistos.some((f) => f.endsWith("SKILL.md")), "revisó la entrevista");
   for (const f of vistos) {
     const texto = fs.readFileSync(f, "utf8").replace(PERMITIDO, "");

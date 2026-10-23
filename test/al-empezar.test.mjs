@@ -44,6 +44,7 @@ test("la segunda sesión trae el aviso de siempre y no vuelve a revisar antes de
   await m.esperar(() => m.llamadas().length === 2);
   const { salida } = m.correr();
   assert.match(salida, /Cuando la plática sea de TRAGO\., llama una vez a «contexto»/);
+  assert.match(salida, /Si no ves el conector/, "también guía a quien todavía no lo agrega");
   assert.doesNotMatch(salida, /primera sesión/);
   await new Promise((r) => setTimeout(r, 200));
   assert.equal(m.llamadas().length, 2);
@@ -92,4 +93,25 @@ test("sin Claude Code a la mano o con archivos rotos: el aviso sale igual y la s
   assert.match(roto.salida, /contexto/);
   assert.doesNotMatch(roto.salida, /no se ha podido/);
   assert.match(m.correr({ CLAUDE_PLUGIN_DATA: "", CLAUDE_CODE_EXECPATH: "" }).salida, /contexto/, "sin carpeta de datos usa la de respaldo");
+});
+
+test("carpeta de datos que no se puede escribir: el aviso sale igual y la sesión no truena", () => {
+  const m = montar();
+  fs.mkdirSync(m.datos, { recursive: true });
+  fs.chmodSync(m.datos, 0o555);
+  try {
+    const { salida } = m.correr();
+    assert.match(salida, /contexto/);
+  } finally { fs.chmodSync(m.datos, 0o755); }
+});
+
+test("si el reloj estuvo en el futuro, no se traba: revisa ya y los 3 días cuentan desde hoy", async () => {
+  const m = montar({ falla: true });
+  fs.mkdirSync(m.datos, { recursive: true });
+  const futuro = m.ahora() + 10 * 365 * 24 * HORA;
+  m.escribir("visto", ""); m.escribir("revisado", futuro); m.escribir("ok", futuro);
+  assert.doesNotMatch(m.correr().salida, /no se ha podido actualizar/);
+  await m.esperar(() => m.llamadas().length === 1 && !fs.existsSync(path.join(m.datos, "candado")));
+  assert.equal(m.llamadas().length, 1, "revisó aunque «revisado» estuviera en el futuro");
+  assert.ok(Number(m.leer("ok")) <= m.ahora(), "«ok» quedó reparado a hoy");
 });
