@@ -51,6 +51,16 @@ Enséñale el resumen en 5 a 7 líneas, en sus palabras, y pregunta «¿Así?».
 
 Si pide cambiar algo después, pregunta qué y guarda solo ese campo.
 
+## La app
+
+El paquete también trae las herramientas de la app de marketing (servidor «app» de este paquete: `quien_soy`, `planeacion_ver`, `pieza_ver`…). Entran con el usuario y la contraseña de la app de cada quien, con sus mismos permisos.
+
+1. Al terminar la entrevista, llama `quien_soy` del servidor «app». Si contesta con su usuario, listo.
+2. Si dice que falta la contraseña o que la app no la aceptó, corre el comando que trae ese mensaje (`sh '…/guardar-clave.sh'`): abre dos ventanitas de la Mac, usuario y contraseña, y la guarda en su llavero. Tú solo ves «Guardada». Luego, sesión nueva.
+3. **Nunca le pidas la contraseña en el chat.** Si la escribe ahí, no la uses ni la repitas, y dile que le avise a Luis para cambiarla.
+4. Si el servidor «app» no aparece o dice que falta Python: que corra `xcode-select --install` (la ventana de Apple, una vez) y abra una sesión nueva.
+5. Lo delicado (avisar al equipo, programar, borrar, aprobar) regresa un código: enséñale qué va a pasar y solo con su «sí» llamas `confirmar`.
+
 ## Si falta el conector
 
 Se agrega una vez y sirve en la compu y en el celular. En claude.ai (o en la app de Claude):

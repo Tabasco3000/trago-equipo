@@ -22,6 +22,7 @@ test("el paquete público no lleva nada que no deba", () => {
   // en un clon limpio .claude-plugin/ todavía no existe (git no guarda carpetas vacías)
   const vistos = REVISAR.map((x) => path.join(RAIZ, x)).filter((x) => fs.existsSync(x)).flatMap(archivos);
   assert.ok(vistos.some((f) => f.endsWith("SKILL.md")), "revisó la entrevista");
+  assert.ok(vistos.some((f) => f.endsWith("app/tm/mcp.py")), "revisó la copia de la app");
   for (const f of vistos) {
     const texto = fs.readFileSync(f, "utf8").replace(PERMITIDO, "");
     for (const [re, que] of PROHIBIDO) {

@@ -15,6 +15,10 @@ else
   echo "Esta persona es del equipo de marketing de TRAGO. y tiene el Cerebro TRAGO. Cuando la plática sea de TRAGO., llama una vez a «contexto» del conector «Cerebro TRAGO.» antes de contestar: trae cómo trabaja el equipo y quién es esta persona. Si dice que falta la entrevista, ofrécela (skill «trago-marketing:entrevista»). Si no ves el conector «Cerebro TRAGO.», ayúdale a agregarlo con los pasos de ese skill."
 fi
 
+AQUI="$(cd "$(dirname "$0")" && pwd)"
+sh "$AQUI/python.sh" > /dev/null || echo "A esta Mac le falta Python para la app de marketing: ofrécele a la persona correr «xcode-select --install» (abre la ventana de Apple para instalar; es una vez y tarda unos minutos) y abrir una sesión nueva al terminar."
+security find-generic-password -s trago-marketing-app > /dev/null 2>&1 || echo "Falta la contraseña de la app de marketing en esta Mac. Cuando la persona vaya a usar la app (o al terminar la entrevista), corre «sh '$AQUI/guardar-clave.sh'»: le pide su usuario y su contraseña en ventanitas de la Mac y los guarda en su llavero. Nunca se la pidas en el chat. Después, que abra una sesión nueva."
+
 OK=$(numero "$(cat "$DATOS/ok" 2>/dev/null)" "$AHORA")
 [ "$OK" = "$(cat "$DATOS/ok" 2>/dev/null)" ] || echo "$AHORA" 2>/dev/null > "$DATOS/ok" # roto o futuro: los 3 días cuentan desde hoy
 REVISADO=$(numero "$(cat "$DATOS/revisado" 2>/dev/null)" 0)
