@@ -38,6 +38,21 @@ test("publica: zip con su huella, catálogo y versión en un solo commit en main
   assert.equal(fuente.sha256, (execFileSync("shasum", ["-a", "256"], { input: zip, encoding: "utf8" }).slice(0, 64)));
   assert.match(git(m.remoto, "show", "main:trago-marketing/.claude-plugin/plugin.json"), /"version": "9\.9\.1"/);
   assert.equal(git(m.remoto, "log", "-1", "--format=%s", "main"), "Versión 9.9.1");
+  assert.equal(git(m.copia, "rev-parse", "HEAD"), git(m.remoto, "rev-parse", "main"), "la copia de trabajo queda al día");
+});
+
+test("solo publica lo que está en git: nada ignorado ni suelto llega al zip ni al repo", () => {
+  const m = montar();
+  fs.mkdirSync(path.join(m.copia, "trago-marketing", ".claude"), { recursive: true });
+  fs.writeFileSync(path.join(m.copia, "trago-marketing", ".claude", "settings.local.json"), "{}");
+  fs.writeFileSync(path.join(m.copia, ".git", "info", "exclude"), "trago-marketing/.claude/\n");
+  assert.equal(m.publicar("9.9.4").status, 0);
+  const zip = path.join(m.copia, "..", "bajado.zip");
+  fs.writeFileSync(zip, execFileSync("git", ["show", "main:dist/trago-marketing-9.9.4.zip"], { cwd: m.remoto }));
+  const lista = execFileSync("unzip", ["-l", zip], { encoding: "utf8" });
+  assert.doesNotMatch(lista, /settings\.local/);
+  assert.match(lista, /\.claude-plugin\/plugin\.json/);
+  assert.doesNotMatch(git(m.remoto, "ls-tree", "-r", "--name-only", "main"), /settings\.local/);
 });
 
 test("si el push falla, todo queda como estaba y se puede reintentar", () => {
@@ -56,5 +71,5 @@ test("no publica desde otra rama ni con versiones raras", () => {
   assert.notEqual(m.publicar("9.9.3").status, 0);
   assert.equal(spawnSync("git", ["rev-parse", "--verify", "-q", "main"], { cwd: m.remoto }).status === 0 ? git(m.remoto, "log", "-1", "--format=%s", "main") : "", "");
   git(m.copia, "checkout", "-q", "main");
-  for (const v of ["", "1.0;rm", "v1", ".1", "1."]) assert.notEqual(m.publicar(v).status, 0, v);
+  for (const v of ["", "1.0;rm", "v1", ".1", "1.", "1..2", "00", "1.2.3.4", "1.2"]) assert.notEqual(m.publicar(v).status, 0, v);
 });

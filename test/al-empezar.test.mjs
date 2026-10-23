@@ -74,13 +74,28 @@ test("si no se pudo actualizar, no marca «ok»; a los 3 días sin poder, avisa 
   const m = montar({ falla: true });
   fs.mkdirSync(m.datos, { recursive: true });
   const viejo = m.ahora() - 4 * 24 * HORA;
-  m.escribir("visto", ""); m.escribir("ok", viejo);
+  m.escribir("visto", ""); m.escribir("ok", viejo); m.escribir("revisado", m.ahora() - 7 * HORA); // ya hubo intentos que fallaron
   assert.match(m.correr().salida, /no se ha podido actualizar en más de 3 días.*Luis/s);
   await m.esperar(() => m.llamadas().length >= 1 && !fs.existsSync(path.join(m.datos, "candado")));
   assert.deepEqual(m.llamadas(), ["plugin marketplace update trago-equipo"], "si falla el catálogo no sigue");
   assert.equal(m.leer("ok"), String(viejo), "una actualización que falló no cuenta como «ok»");
   m.escribir("ok", m.ahora() - 2 * 24 * HORA);
   assert.doesNotMatch(m.correr().salida, /no se ha podido actualizar/);
+});
+
+test("después de días sin abrir sesión (vacaciones) no avisa: primero revisa", () => {
+  const m = montar();
+  fs.mkdirSync(m.datos, { recursive: true });
+  const hace4 = m.ahora() - 4 * 24 * HORA;
+  m.escribir("visto", ""); m.escribir("ok", hace4); m.escribir("revisado", hace4);
+  assert.doesNotMatch(m.correr().salida, /no se ha podido actualizar/);
+});
+
+test("un número con cero a la izquierda en sus archivos no tumba el script", () => {
+  const m = montar();
+  fs.mkdirSync(m.datos, { recursive: true });
+  m.escribir("visto", ""); m.escribir("ok", "08"); m.escribir("revisado", "09");
+  assert.match(m.correr().salida, /contexto/);
 });
 
 test("sin Claude Code a la mano o con archivos rotos: el aviso sale igual y la sesión no truena", async () => {

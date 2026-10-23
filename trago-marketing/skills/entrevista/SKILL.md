@@ -12,6 +12,7 @@ Vas a conocer a alguien del equipo de marketing de TRAGO. para ayudarle mejor en
 1. Llama a `contexto` del conector «Cerebro TRAGO.». Te dice quién es (nombre, y su rol en «Quién es quién»), lo que ya tiene su perfil y lo que le falta.
    - Si no ves el conector, sigue «Si falta el conector» (abajo) y no empieces hasta que esté.
    - Si la puerta dice «sin acceso», todavía no la dan de alta: que le avise a Luis.
+   - Si dice que no pudo leer el perfil, no empieces (podrías pisar lo que ya contestó): dile que lo intenten en un rato.
 2. Busca lo que ya se sabe de ella con `buscar` (una o dos búsquedas, con su nombre). Úsalo solo para tus apuestas; no le leas documentos.
 
 ## Cómo preguntar
@@ -46,7 +47,7 @@ Vas a conocer a alguien del equipo de marketing de TRAGO. para ayudarle mejor en
 
 ## Al terminar
 
-Enséñale el resumen en 5 a 7 líneas, en sus palabras, y pregunta «¿Así?». Corrige lo que diga y guárdalo. Cierra con: «Listo 💙 Cada sesión empieza sabiendo esto. Si algo cambia, dime "actualiza mi perfil"».
+Enséñale el resumen en 5 a 7 líneas, en sus palabras, y pregunta «¿Así?». Corrige lo que diga y guárdalo. Cierra con: «Listo 💙 Desde ahora, cuando hablemos de TRAGO., ya sé esto de ti. Si algo cambia, dime "actualiza mi perfil"».
 
 Si pide cambiar algo después, pregunta qué y guarda solo ese campo.
 
