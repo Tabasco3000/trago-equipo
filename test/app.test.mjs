@@ -28,17 +28,18 @@ function montar(falsos) {
 const SECURITY = (usuario) => (usuario
   ? `case "$1" in find-generic-password) case "$*" in *-w*) exit 44 ;; esac; echo 'keychain: "/x"'; echo '    "acct"<blob>="${usuario}"'; echo '    "svce"<blob>="trago-marketing-app"' ;; esac`
   : "exit 44");
-const PY_FALSO = (log) => `echo "TM_USUARIO=$TM_USUARIO $*" >> "${log}"`;
+// Python falso: pasa la revisión de certificados y anota con qué lo arrancan.
+const PY_FALSO = (log, certificados = true) => `case "$*" in *cert_store_stats*) exit ${certificados ? 0 : 1} ;; *claude.json*) exit 1 ;; esac\necho "TM_USUARIO=$TM_USUARIO base=\${TM_BASE:-no} $*" >> "${log}"`;
 
 test("arranque: usa el Python de Homebrew y el usuario del llavero", () => {
   const m = montar({ security: SECURITY("fulana") });
   const py = path.join(m.bin, "py-homebrew"), uso = path.join(m.dir, "uso.log");
   fs.writeFileSync(py, `#!/bin/sh\n${PY_FALSO(uso)}\n`, { mode: 0o755 });
-  const r = spawnSync("sh", [path.join(SCRIPTS, "app-mcp.sh")], { encoding: "utf8", env: m.env({ TRAGO_PY_OTROS: `${NADA} ${py}`, TRAGO_PY_APPLE: NADA }) });
+  const r = spawnSync("sh", [path.join(SCRIPTS, "app-mcp.sh")], { encoding: "utf8", env: m.env({ TRAGO_PY_OTROS: `${NADA} ${py}`, TRAGO_PY_APPLE: NADA, TM_BASE: "https://otro.ejemplo" }) });
   assert.equal(r.status, 0, r.stderr);
   const linea = fs.readFileSync(uso, "utf8").trim();
-  assert.match(linea, /^TM_USUARIO=fulana \S*\/app\/trago_marketing_mcp\.py$/);
-  assert.ok(fs.existsSync(linea.split(" ")[1]), "el MCP existe donde lo busca");
+  assert.match(linea, /^TM_USUARIO=fulana base=no -E -s \S*\/app\/trago_marketing_mcp\.py$/, "la contraseña nunca va a otra base");
+  assert.ok(fs.existsSync(linea.split(" ").at(-1)), "el MCP existe donde lo busca");
 });
 
 test("arranque sin usuario guardado: «sin-usuario», nunca el de otra persona", () => {
@@ -75,8 +76,18 @@ test("al abrir sesión: avisa si falta Python o la contraseña, con la ruta de l
   assert.match(s, /Nunca se la pidas en el chat/);
   assert.match(s, /contexto/, "el aviso de siempre sale igual");
   const todo = montar({ security: SECURITY("fulana") });
-  const t = correr(todo, { TRAGO_PY_OTROS: "/bin/sh" });
+  fs.writeFileSync(path.join(todo.bin, "py"), `#!/bin/sh\n${PY_FALSO(path.join(todo.dir, "uso.log"))}\n`, { mode: 0o755 });
+  const t = correr(todo, { TRAGO_PY_OTROS: path.join(todo.bin, "py") });
   assert.doesNotMatch(t, /Python|contraseña/);
+});
+
+test("un Python sin certificados (python.org sin «Install Certificates») se salta: no podría hablar con la app", () => {
+  const m = montar({ security: SECURITY("fulana") });
+  const sin = path.join(m.bin, "py-sin"), con = path.join(m.bin, "py-con"), uso = path.join(m.dir, "uso.log");
+  fs.writeFileSync(sin, `#!/bin/sh\n${PY_FALSO(uso, false)}\n`, { mode: 0o755 });
+  fs.writeFileSync(con, `#!/bin/sh\n${PY_FALSO(uso)}\n`, { mode: 0o755 });
+  assert.equal(execFileSync("sh", [path.join(SCRIPTS, "python.sh")], { encoding: "utf8", env: m.env({ TRAGO_PY_OTROS: `${sin} ${con}`, TRAGO_PY_APPLE: NADA }) }).trim(), con);
+  assert.notEqual(spawnSync("sh", [path.join(SCRIPTS, "python.sh")], { env: m.env({ TRAGO_PY_OTROS: sin, TRAGO_PY_APPLE: NADA }) }).status, 0);
 });
 
 // Ventanitas falsas: contestan en orden lo que trae RESPUESTAS (una por línea); «CANCELAR» = botón Cancelar.
@@ -146,12 +157,46 @@ test("el MCP de la app arranca con el python3 de Apple y contesta tools/list; si
   assert.doesNotMatch(texto, /Terminal/);
 });
 
+// Arranca el MCP del paquete por stdio y regresa los nombres de sus herramientas.
+async function herramientas(m, extra = {}) {
+  const p = spawn("sh", [path.join(SCRIPTS, "app-mcp.sh")], { env: m.env({ TRAGO_PY_OTROS: NADA, ...extra }) });
+  let out = "";
+  p.stdout.on("data", (d) => (out += d));
+  p.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "prueba", version: "0" } } }) + "\n");
+  p.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list" }) + "\n");
+  for (let i = 0; i < 100 && out.trim().split("\n").length < 2; i++) await new Promise((r) => setTimeout(r, 50));
+  p.stdin.end();
+  await new Promise((r) => p.on("close", r));
+  return JSON.parse(out.trim().split("\n")[1]).result.tools.map((x) => x.name);
+}
+
+test("si la Mac ya tiene su propio conector de la app, el del paquete arranca sin herramientas (no se repiten)", { skip: !fs.existsSync("/usr/bin/python3") || spawnSync("xcode-select", ["-p"]).status !== 0 }, async () => {
+  const m = montar({ security: SECURITY("fulana") });
+  const propio = { mcpServers: { "trago-marketing": { type: "stdio", command: "/opt/homebrew/bin/python3", args: ["/Users/x/trago-marketing-mcp/trago_marketing_mcp.py"] } } };
+  assert.ok((await herramientas(m)).includes("quien_soy"), "sin conector propio, el del paquete trae todo");
+  fs.writeFileSync(path.join(m.dir, ".claude.json"), JSON.stringify({ mcpServers: { otro: { command: "x" } } }));
+  assert.ok((await herramientas(m)).includes("quien_soy"), "otro conector cualquiera no lo apaga");
+  fs.writeFileSync(path.join(m.dir, ".claude.json"), JSON.stringify(propio));
+  assert.deepEqual(await herramientas(m), []);
+  const cfg = path.join(m.dir, "cfg");
+  fs.mkdirSync(cfg);
+  fs.renameSync(path.join(m.dir, ".claude.json"), path.join(cfg, ".claude.json"));
+  assert.deepEqual(await herramientas(m, { CLAUDE_CONFIG_DIR: cfg }), [], "también con CLAUDE_CONFIG_DIR");
+});
+
+test("las pruebas del MCP de la app (redirects, 401, candado de confirmar, subidas) pasan contra la copia parchada del paquete", () => {
+  const r = spawnSync("python3", ["-B", "-m", "unittest", "test_mcp"], { cwd: path.join(PAQ, "app"), encoding: "utf8",
+    env: { PATH: "/opt/homebrew/bin:/usr/bin:/bin", HOME: os.tmpdir(), TM_USUARIO: "luis", PYTHONPATH: new URL("app-py", import.meta.url).pathname } });
+  assert.equal(r.status, 0, r.stderr.slice(-1500));
+  assert.match(r.stderr, /Ran (\d{2,}) tests/);
+});
+
 test("la copia de la app: no dice «Luis», no cae en su usuario, su actualizador no corre git, y todo lo que nombra existe", () => {
   const app = path.join(PAQ, "app");
   const archivos = (p) => (fs.statSync(p).isDirectory() ? fs.readdirSync(p).flatMap((x) => archivos(path.join(p, x))) : [p]);
   const todos = archivos(app);
   assert.ok(todos.some((f) => f.endsWith("tm/mcp.py")) && fs.existsSync(path.join(app, "ORIGEN")));
-  for (const f of todos) assert.doesNotMatch(fs.readFileSync(f, "utf8"), /Luis|LUIS/, path.relative(PAQ, f));
+  for (const f of todos) assert.doesNotMatch(fs.readFileSync(f, "utf8"), /Luis|LUIS|de_luis/, path.relative(PAQ, f));
   const api = fs.readFileSync(path.join(app, "tm/api.py"), "utf8");
   assert.match(api, /"TM_USUARIO", "sin-usuario"/);
   assert.doesNotMatch(fs.readFileSync(path.join(app, "tm/actualizar.py"), "utf8"), /subprocess|os\.system|os\.popen|["']git["']/);

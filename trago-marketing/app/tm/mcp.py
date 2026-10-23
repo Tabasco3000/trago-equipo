@@ -428,7 +428,7 @@ def pendiente(nombre, args):
     desc = HERRAMIENTAS[nombre][0].split(" PIDE EL OK")[0]
     c = f"{secrets.randbelow(10**6):06d}"
     _pendientes[c] = (nombre, json.loads(json.dumps(args)), time.time() + VIGENCIA)
-    r = {"ok": False, "falta_ok_de_luis": True, "herramienta": nombre, "que_hace": desc, "datos": args, "codigo": c,
+    r = {"ok": False, "falta_ok": True, "herramienta": nombre, "que_hace": desc, "datos": args, "codigo": c,
          "siguiente": f"Enséñale esto a la persona y espera su «sí» explícito. Luego llama confirmar con codigo={c}."}
     if nombre in PIEZA:
         try:

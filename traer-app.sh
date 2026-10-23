@@ -12,7 +12,7 @@ rm -rf "$DEST"
 mkdir -p "$DEST/tm"
 cp "$ORIGEN/trago_marketing_mcp.py" "$DEST/"
 for f in __init__ api mcp; do cp "$ORIGEN/tm/$f.py" "$DEST/tm/"; done
-sed -i '' -e 's/Luis dijo/la persona dijo/g' -e 's/ a Luis/ a la persona/g' -e 's/de Luis/de la persona/g' -e 's/DE LUIS/DE LA PERSONA/g' "$DEST/tm/mcp.py"
+sed -i '' -e 's/Luis dijo/la persona dijo/g' -e 's/ a Luis/ a la persona/g' -e 's/de Luis/de la persona/g' -e 's/DE LUIS/DE LA PERSONA/g' -e 's/falta_ok_de_luis/falta_ok/g' "$DEST/tm/mcp.py"
 # Sin usuario nunca cae en el de Luis, y la contraseña se guarda con la ventanita del paquete, no pegándola en una Terminal.
 sed -i '' -e 's/"TM_USUARIO", "luis"/"TM_USUARIO", "sin-usuario"/' \
   -e 's|^GUARDAR = .*|GUARDAR = "sh '"'"'" + os.path.abspath(os.path.join(os.path.dirname(__file__), "../../scripts/guardar-clave.sh")) + "'"'"'"|' \
@@ -40,5 +40,7 @@ def pendiente(repo=None):
 def instalar(repo=None, pruebas=None):
     return {"estado": "al_dia", "version": version(), "nota": "Este conector lo actualiza solo el paquete trago-marketing."}
 EOF
+# Sus pruebas corren contra la copia parchada (test/app.test.mjs); no van en el paquete.
+mkdir -p test/app-py && sed 's/falta_ok_de_luis/falta_ok/g' "$ORIGEN/tests/test_mcp.py" > test/app-py/test_mcp.py
 git -C "$ORIGEN" log -1 --format='%h %cs %s' > "$DEST/ORIGEN"
 echo "Copiado de $(cat "$DEST/ORIGEN")"

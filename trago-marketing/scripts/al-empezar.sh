@@ -17,7 +17,7 @@ fi
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 sh "$AQUI/python.sh" > /dev/null || echo "A esta Mac le falta Python para la app de marketing: ofrécele a la persona correr «xcode-select --install» (abre la ventana de Apple para instalar; es una vez y tarda unos minutos) y abrir una sesión nueva al terminar."
-security find-generic-password -s trago-marketing-app > /dev/null 2>&1 || echo "Falta la contraseña de la app de marketing en esta Mac. Cuando la persona vaya a usar la app (o al terminar la entrevista), corre «sh '$AQUI/guardar-clave.sh'»: le pide su usuario y su contraseña en ventanitas de la Mac y los guarda en su llavero. Nunca se la pidas en el chat. Después, que abra una sesión nueva."
+security find-generic-password -s trago-marketing-app > /dev/null 2>&1 || echo "Falta la contraseña de la app de marketing en esta Mac. Cuando la persona vaya a usar la app (o al terminar la entrevista), corre «sh '$AQUI/guardar-clave.sh'» con 10 minutos de tiempo de espera: le pide su usuario y su contraseña en ventanitas de la Mac y los guarda en su llavero. Nunca se la pidas en el chat. Después, que abra una sesión nueva."
 
 OK=$(numero "$(cat "$DATOS/ok" 2>/dev/null)" "$AHORA")
 [ "$OK" = "$(cat "$DATOS/ok" 2>/dev/null)" ] || echo "$AHORA" 2>/dev/null > "$DATOS/ok" # roto o futuro: los 3 días cuentan desde hoy
