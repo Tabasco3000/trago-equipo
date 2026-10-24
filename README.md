@@ -13,7 +13,7 @@ No lleva llaves, documentos ni datos. Lo del equipo lo entrega el Cerebro, y sol
    "${CLAUDE_CODE_EXECPATH:-claude}" plugin install trago-marketing --marketplace https://raw.githubusercontent.com/Tabasco3000/trago-equipo/main/.claude-plugin/marketplace.json
    ```
 
-3. **Abre una sesión nueva.** El Cerebro se presenta y te hace la entrevista (unos 10 minutos). Al final, Claude te abre una ventanita de la Mac para tu usuario y contraseña de la app de marketing (se guardan en tu llavero; nunca se escriben en el chat). Si tu Mac no tiene Python, primero te sale la ventana de Apple para instalar sus herramientas (una vez).
+3. **Abre una sesión nueva.** El Cerebro se presenta y te hace la entrevista (unos 5 minutos). Al final, Claude te abre una ventanita de la Mac para tu usuario y contraseña de la app de marketing (se guardan en tu llavero; nunca se escriben en el chat). Si tu Mac no tiene Python, primero te sale la ventana de Apple para instalar sus herramientas (una vez).
 
 ## Qué trae
 

@@ -36,7 +36,7 @@ Vas a conocer a alguien del equipo de marketing de TRAGO. para ayudarle mejor en
 6. (a_mano) ¿Qué haces a mano que te gustaría que hiciera Claude?
 7. (seguimiento) Solo Fradell: ¿cómo le das seguimiento a tu equipo y qué quieres saber de cada quien sin preguntarle?
 
-Las respuestas de la 2 y la 3 van cada una en sus dos campos.
+En la 2 y la 3, reparte la respuesta en sus dos campos (rol / negocios, semana / te_piden). Si solo falta uno de los dos, pregunta solo esa parte.
 
 ## Al terminar
 
