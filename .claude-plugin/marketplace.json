@@ -8,8 +8,8 @@
       "description": "El Cerebro TRAGO. para el equipo de marketing: la entrevista de entrada, y después los agentes del equipo.",
       "source": {
         "source": "archive",
-        "url": "https://raw.githubusercontent.com/Tabasco3000/trago-equipo/main/dist/trago-marketing-0.2.0.zip",
-        "sha256": "8eab9a7338ec591404597ff29eac4976f0eb957fded2988442b805b102d22dc9"
+        "url": "https://raw.githubusercontent.com/Tabasco3000/trago-equipo/main/dist/trago-marketing-0.2.1.zip",
+        "sha256": "4d3a9b9bc023c3ecd17071c54d2dbee63e24d6dab629ca286c4d384a452037d4"
       }
     }
   ]
