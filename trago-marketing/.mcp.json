@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "app": {
-      "command": "sh",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/app-mcp.sh"]
-    }
-  }
-}

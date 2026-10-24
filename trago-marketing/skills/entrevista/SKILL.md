@@ -44,16 +44,6 @@ Enséñale el resumen en 5 a 7 líneas, en sus palabras, y pregunta «¿Así?».
 
 Si pide cambiar algo después, pregunta qué y guarda solo ese campo.
 
-## La app
-
-El paquete también trae las herramientas de la app de marketing (servidor «app» de este paquete: `quien_soy`, `planeacion_ver`, `pieza_ver`…; si la persona ya tenía su propio conector «trago-marketing», el del paquete viene vacío y se usa el suyo). Entran con el usuario y la contraseña de la app de cada quien, con sus mismos permisos.
-
-1. Al terminar la entrevista, llama `quien_soy` del servidor «app». Si contesta con su usuario, listo.
-2. Si dice que falta la contraseña o que la app no la aceptó, corre el comando que trae ese mensaje (`sh '…/guardar-clave.sh'`, con 10 minutos de tiempo de espera: la persona tiene que escribir): abre dos ventanitas de la Mac, usuario y contraseña, y la guarda en su llavero. Tú solo ves «Guardada». Luego, sesión nueva.
-3. **Nunca le pidas la contraseña en el chat.** Si la escribe ahí, no la uses ni la repitas, y dile que le avise a Luis para cambiarla.
-4. Si el servidor «app» no aparece o dice que falta Python: que corra `xcode-select --install` (la ventana de Apple, una vez) y abra una sesión nueva.
-5. Lo delicado (avisar al equipo, programar, borrar, aprobar) regresa un código: enséñale qué va a pasar y solo con su «sí» llamas `confirmar`. Si la app de Claude le pide permiso para `confirmar`, que nunca elija «permitir siempre».
-
 ## Si falta el conector
 
 Se agrega una vez y sirve en la compu y en el celular. En claude.ai (o en la app de Claude):
@@ -63,5 +53,7 @@ Se agrega una vez y sirve en la compu y en el celular. En claude.ai (o en la app
 3. En «Cliente OAuth» deja «Usar la identidad publicada de Claude (Recomendado)». Las otras dos opciones no funcionan con el Cerebro.
 4. «Iniciar sesión ahora» › «Añadir» › entra con **tu** Google (el tuyo, nunca una cuenta compartida de TRAGO.).
 5. Abre una sesión nueva.
+
+La app de marketing va en su propio conector, con los mismos pasos: nombre `TRAGO. Marketing` · URL `https://conector-marketing.tragotragotrago.com/mcp`. Entra con su Google y tiene sus permisos de siempre en la app.
 
 Si alguien te manda un link para conectar el Cerebro, no lo abras: solo se conecta así, desde tus propios Ajustes.

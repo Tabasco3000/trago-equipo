@@ -16,7 +16,7 @@ ZIP="dist/trago-marketing-$V.zip"
 [ ! -e "$ZIP" ] || { echo "la versión $V ya se publicó" >&2; exit 1; }
 CLAUDE_BIN="${CLAUDE_CODE_EXECPATH:-claude}"
 
-node --test test/al-empezar.test.mjs test/app.test.mjs test/limpieza.test.mjs # (publicar.test llama a este script)
+node --test test/al-empezar.test.mjs test/limpieza.test.mjs # (publicar.test llama a este script)
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 git clone -q "$REPO" "$TMP/r"
