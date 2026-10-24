@@ -172,16 +172,31 @@ async function herramientas(m, extra = {}) {
 
 test("si la Mac ya tiene su propio conector de la app, el del paquete arranca sin herramientas (no se repiten)", { skip: !fs.existsSync("/usr/bin/python3") || spawnSync("xcode-select", ["-p"]).status !== 0 }, async () => {
   const m = montar({ security: SECURITY("fulana") });
-  const propio = { mcpServers: { "trago-marketing": { type: "stdio", command: "/opt/homebrew/bin/python3", args: ["/Users/x/trago-marketing-mcp/trago_marketing_mcp.py"] } } };
+  const script = path.join(m.dir, "trago-marketing-mcp", "trago_marketing_mcp.py");
+  const propio = { mcpServers: { "trago-marketing": { type: "stdio", command: "/opt/homebrew/bin/python3", args: [script] } } };
   assert.ok((await herramientas(m)).includes("quien_soy"), "sin conector propio, el del paquete trae todo");
   fs.writeFileSync(path.join(m.dir, ".claude.json"), JSON.stringify({ mcpServers: { otro: { command: "x" } } }));
   assert.ok((await herramientas(m)).includes("quien_soy"), "otro conector cualquiera no lo apaga");
   fs.writeFileSync(path.join(m.dir, ".claude.json"), JSON.stringify(propio));
+  assert.ok((await herramientas(m)).includes("quien_soy"), "un conector propio que apunta a un archivo borrado no cuenta");
+  fs.mkdirSync(path.dirname(script));
+  fs.writeFileSync(script, "");
   assert.deepEqual(await herramientas(m), []);
   const cfg = path.join(m.dir, "cfg");
   fs.mkdirSync(cfg);
   fs.renameSync(path.join(m.dir, ".claude.json"), path.join(cfg, ".claude.json"));
   assert.deepEqual(await herramientas(m, { CLAUDE_CONFIG_DIR: cfg }), [], "también con CLAUDE_CONFIG_DIR");
+});
+
+test("un ssl.py o json.py en la carpeta donde se abrió Claude no se corre al buscar Python ni al revisar el conector propio", { skip: !fs.existsSync("/usr/bin/python3") || spawnSync("xcode-select", ["-p"]).status !== 0 }, () => {
+  const m = montar({ security: SECURITY("fulana") });
+  const trampa = path.join(m.dir, "trampa"), marca = path.join(m.dir, "se-corrio");
+  fs.mkdirSync(trampa);
+  for (const mod of ["ssl", "json"]) fs.writeFileSync(path.join(trampa, `${mod}.py`), `open(${JSON.stringify(marca)}, "a").write("${mod}")\n`);
+  fs.writeFileSync(path.join(m.dir, ".claude.json"), "{}");
+  execFileSync("sh", [path.join(SCRIPTS, "python.sh")], { cwd: trampa, env: m.env({ TRAGO_PY_OTROS: NADA }) });
+  spawnSync("sh", [path.join(SCRIPTS, "app-mcp.sh")], { cwd: trampa, input: "", env: m.env({ TRAGO_PY_OTROS: NADA }) });
+  assert.ok(!fs.existsSync(marca), fs.existsSync(marca) && fs.readFileSync(marca, "utf8"));
 });
 
 test("las pruebas del MCP de la app (redirects, 401, candado de confirmar, subidas) pasan contra la copia parchada del paquete", () => {
